@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Project Estimates Are Hard Now</title>
+<style>
+  :root{
+    --paper:#FAFBFC;
+    --card:#FFFFFF;
+    --ink:#1B222D;
+    --ink-2:#535C69;
+    --ink-3:#8A93A1;
+    --rule:#E4E7EC;
+    --rule-soft:#EDEFF2;
+    --blue:#2D6CDF;     /* implementation · cognitive · the dividend */
+    --terra:#B6532E;    /* exploration · the unpredictable remainder */
+    --ochre:#C9821B;    /* the waits */
+    --garnet:#B23E72;   /* judgment */
+    --serif:Charter,"Bitstream Charter","Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  .wrap{max-width:42rem;margin:0 auto;padding:64px 24px 96px}
+
+  /* ---- masthead ---- */
+  .masthead{margin-bottom:44px}
+  .kicker{
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--blue);margin:0 0 18px;
+  }
+  h1{
+    font-family:var(--sans);font-weight:600;font-size:40px;line-height:1.08;
+    letter-spacing:-0.02em;margin:0 0 18px;
+  }
+  .dek{
+    font-size:21px;line-height:1.5;color:var(--ink-2);margin:0 0 20px;font-style:italic;
+  }
+  .byline{
+    font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-3);
+    margin:0;padding-top:16px;border-top:1px solid var(--rule);
+  }
+
+  /* ---- prose ---- */
+  .prose p{font-size:19px;line-height:1.66;margin:0 0 24px}
+  .prose h2{
+    font-family:var(--sans);font-weight:600;font-size:25px;letter-spacing:-0.01em;
+    line-height:1.2;margin:52px 0 20px;
+  }
+  .prose strong{font-weight:600}
+  .prose em{font-style:italic}
+  .lead::first-letter{
+    font-family:var(--sans);font-weight:600;float:left;font-size:62px;line-height:.82;
+    padding:6px 10px 0 0;color:var(--ink);
+  }
+  a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(45,108,223,.32)}
+  a:hover{border-bottom-color:var(--blue)}
+
+  .dinkus{
+    text-align:center;color:var(--ink-3);font-family:var(--mono);
+    letter-spacing:.5em;margin:44px 0 40px;font-size:14px;
+  }
+
+  /* footnote refs */
+  sup.fnref{font-size:.62em;line-height:0;vertical-align:super;font-family:var(--sans)}
+  sup.fnref a{
+    border:none;font-weight:600;padding:0 1px;
+  }
+  .notes{margin-top:64px;padding-top:24px;border-top:1px solid var(--rule)}
+  .notes h2{font-family:var(--sans);font-weight:600;font-size:15px;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--ink-2);margin:0 0 16px}
+  .notes ol{margin:0;padding-left:20px}
+  .notes li{font-size:15.5px;line-height:1.6;color:var(--ink-2);margin-bottom:14px;padding-left:4px}
+  .notes li:target{background:rgba(45,108,223,.07);border-radius:4px;
+    box-shadow:0 0 0 6px rgba(45,108,223,.07)}
+  .fnback{margin-left:6px;border:none;font-family:var(--sans);font-size:13px}
+
+  /* ============ shared figure shell ============ */
+  .fig{
+    background:var(--card);border:1px solid var(--rule);border-radius:12px;
+    padding:24px 24px 20px;margin:40px 0;font-family:var(--sans);
+  }
+  .fig-eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-3);margin:0 0 9px;
+  }
+  .fig-title{font-family:var(--sans);font-weight:600;font-size:19px;letter-spacing:-0.01em;margin:0 0 8px;color:var(--ink)}
+  .fig-dek{font-family:var(--sans);font-size:14px;line-height:1.55;color:var(--ink-2);margin:0 0 20px;max-width:60ch}
+  .fig-cap{
+    font-family:var(--sans);font-size:12.5px;line-height:1.5;color:var(--ink-3);
+    margin:16px 0 0;padding-top:14px;border-top:1px solid var(--rule-soft);
+  }
+  /* shared range input */
+  .fig input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;
+    background:linear-gradient(90deg,var(--rule) 0%,#9DB6E8 100%);outline:none;margin:0;cursor:pointer;
+  }
+  .fig input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:19px;height:19px;border-radius:50%;
+    background:var(--blue);border:3px solid #fff;box-shadow:0 1px 4px rgba(27,34,45,.28);cursor:grab;
+  }
+  .fig input[type=range]::-webkit-slider-thumb:active{cursor:grabbing}
+  .fig input[type=range]::-moz-range-thumb{
+    width:19px;height:19px;border-radius:50%;background:var(--blue);
+    border:3px solid #fff;box-shadow:0 1px 4px rgba(27,34,45,.28);cursor:grab;
+  }
+  .fig input[type=range]:focus-visible{outline:2px solid var(--blue);outline-offset:6px;border-radius:4px}
+
+  /* ============ map figure ============ */
+  #fig-map .plot-area{display:flex;gap:10px}
+  #fig-map .yaxis{position:relative;width:18px;flex:0 0 18px}
+  #fig-map .yaxis span{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-90deg);
+    white-space:nowrap;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-2);
+  }
+  #fig-map .plot-col{flex:1 1 auto;min-width:0}
+  #fig-map .plot{
+    position:relative;width:100%;aspect-ratio:7/5;background:#fff;
+    border:1px solid var(--rule);border-radius:4px;overflow:hidden;
+  }
+  #fig-map .czone{position:absolute;top:0;bottom:0;left:60%;right:0;
+    background:linear-gradient(90deg,rgba(45,108,223,.045),rgba(45,108,223,.075));pointer-events:none}
+  #fig-map .threshold{position:absolute;top:0;bottom:0;left:60%;border-left:1px dashed #B9C4D6;pointer-events:none}
+  #fig-map .threshold b{position:absolute;top:6px;left:6px;font-family:var(--mono);font-size:9.5px;
+    letter-spacing:.04em;color:#9AA6B8;font-weight:500;white-space:nowrap}
+  #fig-map .midline{position:absolute;background:var(--rule-soft);pointer-events:none}
+  #fig-map .midline.h{left:0;right:0;top:50%;height:1px}
+  #fig-map .midline.v{top:0;bottom:0;left:50%;width:1px}
+  #fig-map .qlabel{position:absolute;font-family:var(--mono);font-size:9.5px;line-height:1.35;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);pointer-events:none;max-width:43%}
+  #fig-map .qlabel b{display:block;color:var(--ink-2);font-weight:600;letter-spacing:.05em}
+  #fig-map .q-tl{top:9px;left:10px}
+  #fig-map .q-tr{top:9px;right:10px;text-align:right}
+  #fig-map .q-bl{bottom:9px;left:10px}
+  #fig-map .q-br{bottom:9px;right:10px;text-align:right}
+  #fig-map .node{position:absolute;transform:translate(-50%,-50%);z-index:3}
+  #fig-map .node:hover,#fig-map .node:focus-visible{z-index:9;outline:none}
+  #fig-map .dot{width:11px;height:11px;border-radius:50%;border:1.5px solid #fff;transition:transform .15s ease}
+  #fig-map .node:hover .dot,#fig-map .node:focus-visible .dot{transform:scale(1.45)}
+  #fig-map .lbl{position:absolute;top:50%;transform:translateY(-50%);font-size:10.5px;line-height:1.1;
+    color:var(--ink-2);white-space:nowrap;pointer-events:none}
+  #fig-map .node:hover .lbl,#fig-map .node:focus-visible .lbl{color:var(--ink);font-weight:600}
+  #fig-map .lbl.right{left:11px}
+  #fig-map .lbl.left{right:11px;text-align:right}
+  #fig-map .cat-cog .dot{background:var(--blue)}
+  #fig-map .cat-wait .dot{background:var(--ochre)}
+  #fig-map .cat-judg .dot{background:var(--garnet)}
+  #fig-map .trail{position:absolute;height:2px;transform:translateY(-50%);background:var(--blue);
+    opacity:.22;z-index:1;pointer-events:none;border-radius:2px}
+  #fig-map .origin{position:absolute;width:6px;height:6px;border-radius:50%;transform:translate(-50%,-50%);
+    border:1.5px solid var(--blue);background:transparent;opacity:.4;z-index:2;pointer-events:none}
+  #fig-map .xaxis{margin:7px 0 0 28px;text-align:center;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+  #fig-map .ctl{margin:22px 0 0}
+  #fig-map .ctl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  #fig-map .ctl-top .name{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+  #fig-map .ctl-top .val{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+  #fig-map .ends{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin-top:7px}
+  #fig-map .legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin:20px 0 0;padding-top:16px;border-top:1px solid var(--rule-soft)}
+  #fig-map .legend div{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+  #fig-map .legend i{width:10px;height:10px;border-radius:50%;flex:0 0 10px}
+  #fig-map .legend b{color:var(--ink);font-weight:600}
+  #fig-map .sw-cog{background:var(--blue)}#fig-map .sw-wait{background:var(--ochre)}#fig-map .sw-judg{background:var(--garnet)}
+  #fig-map .readout{margin-top:14px;font-size:13.5px;line-height:1.55;color:var(--ink-2);
+    background:var(--paper);border:1px solid var(--rule-soft);border-radius:6px;padding:13px 15px}
+  #fig-map .readout .n{font-family:var(--mono);color:var(--ink);font-weight:600}
+
+  /* ============ inversion figure ============ */
+  #fig-inv .iv-controls{display:grid;gap:16px;margin-bottom:26px}
+  #fig-inv .iv-ctl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+  #fig-inv .iv-val{color:var(--ink);font-weight:600}
+  #fig-inv .iv-cap{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-3);margin:0 0 9px;display:flex;justify-content:space-between;align-items:baseline}
+  #fig-inv .iv-speed{color:var(--blue);font-weight:600}
+  #fig-inv .iv-mixrow,#fig-inv .iv-scalerow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  #fig-inv .iv-rowlab{flex:0 0 42px;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--ink-3);text-align:right}
+  #fig-inv .iv-bar{flex:1 1 auto;display:flex;height:38px;border-radius:5px;overflow:hidden;background:var(--rule-soft)}
+  #fig-inv .iv-seg{display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;
+    font-size:11.5px;font-weight:600;color:#fff;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  #fig-inv .iv-impl{background:var(--blue)}
+  #fig-inv .iv-expl{background:var(--terra)}
+  #fig-inv .iv-track{flex:1 1 auto;height:14px;border-radius:4px;background:var(--rule-soft);display:flex;overflow:hidden}
+  #fig-inv .iv-track .s{height:100%;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  #fig-inv .iv-tnum{flex:0 0 76px;font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+  #fig-inv .iv-scalewrap{margin-bottom:4px}
+  #fig-inv .iv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0 0}
+  #fig-inv .iv-stat{background:var(--paper);border:1px solid var(--rule-soft);border-radius:6px;padding:11px 12px}
+  #fig-inv .iv-stat-lab{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-3);margin-bottom:5px}
+  #fig-inv .iv-stat-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink)}
+  #fig-inv .iv-stat-val .ar{color:var(--ink-3);font-weight:400;margin:0 3px}
+  #fig-inv .iv-foot{font-family:var(--sans);font-size:12px;line-height:1.5;color:var(--ink-3);margin:14px 0 0}
+
+  @media (max-width:600px){
+    .wrap{padding:44px 18px 72px}
+    h1{font-size:31px}
+    .dek{font-size:19px}
+    .prose p{font-size:17.5px}
+    .prose h2{font-size:22px}
+    #fig-map .q-tr,#fig-map .q-br{display:none}
+    #fig-map .lbl{font-size:9.5px}
+    #fig-inv .iv-stats{grid-template-columns:1fr}
+    #fig-inv .iv-seg{font-size:10.5px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    #fig-map .node,#fig-map .trail,#fig-inv .iv-seg,#fig-inv .iv-track .s{transition:none!important}
+  }
+  #fig-map .node,#fig-map .trail{transition:left .55s cubic-bezier(.4,0,.2,1),width .55s cubic-bezier(.4,0,.2,1)}
+</style>
+</head>
+<body>
+<article class="wrap">
+
+  <header class="masthead">
+    <p class="kicker">Estimation</p>
+    <h1>Why Project Estimates Are Hard Now</h1>
+    <p class="dek">Coding agents made me far faster and far less able to say when anything will be done. Those turn out to be the same fact.</p>
+    <p class="byline">June 2026</p>
+  </header>
+
+  <div class="prose">
+
+    <p class="lead">A few weekends ago I watched a coding agent build a side project faster than I could keep up with &mdash; the kind of thing that would have taken me months when I started out, two years ago. What I remember most isn&rsquo;t the speed. It&rsquo;s how often the agent sat idle, done with everything I&rsquo;d given it, waiting for me to work out what the next thing even was.</p>
+
+    <p>The bottleneck wasn&rsquo;t the model. It was me. And that gap &mdash; the machine idle, the human the holdup &mdash; is the whole story of why I can suddenly do so much more and predict so much less.</p>
+
+    <p>I&rsquo;m a tech lead, so estimates are part of my job: I give the dates and then answer for them. I haven&rsquo;t been doing it for decades, but I&rsquo;ve made enough forecasts, and been held to enough of them, to feel the ground move &mdash; and it has moved sharply since I started leaning on coding harnesses like Codex. Output went up and the estimate fell apart in the same motion, and for a while I couldn&rsquo;t say why.</p>
+
+    <p>Here&rsquo;s where I&rsquo;ve landed. Coding agents didn&rsquo;t make estimation harder by adding uncertainty. They made it harder by compressing the predictable part of the work almost to nothing while leaving the unpredictable part untouched. What&rsquo;s left in the schedule is mostly the stuff you were never able to estimate in the first place.</p>
+
+    <p>That takes two old ideas and one new one.</p>
+
+    <h2>Two kinds of work</h2>
+
+    <p>In 1986 Fred Brooks drew a line through software that has never stopped being useful. Some difficulty, he said, is accidental: the friction of expressing something you already understand &mdash; boilerplate, plumbing, syntax. The rest is essential: the irreducible work of figuring out what the thing should be and how its parts fit. Tools chip at the accidental forever and never touch the essential. Four decades of languages and frameworks proved him right; each made expression cheaper and left the thinking exactly as hard.</p>
+
+    <p>I&rsquo;d draw the line slightly differently now, because the distinction that bites today isn&rsquo;t design versus typing. It&rsquo;s predictable versus surprising. Call the predictable part <em>implementation</em>: any stretch where you already hold a clear model in your head and you&rsquo;re just turning it into code &mdash; you know what you&rsquo;ll type before you type it. Call everything else <em>exploration</em>: clarifying a vague requirement, fitting a feature into a system that wasn&rsquo;t built for it, and above all the surprises. The API that returns what the docs never mentioned. The change request that quietly invalidates your architecture. The assumption that turns out false on line 200. Once in a while, the library release that saves you six months.</p>
+
+    <p>Exploration isn&rsquo;t a phase. It doesn&rsquo;t sit in a tidy block at the start; it&rsquo;s threaded through the implementation down to individual keystrokes, and you usually can&rsquo;t see it coming. Its unit isn&rsquo;t an hour or a day. It&rsquo;s a surprise.<sup class="fnref" id="fnref-1"><a href="#fn-1">1</a></sup></p>
+
+    <h2>The jagged dividend</h2>
+
+    <p>In 2023 a team led by Fabrizio Dell&rsquo;Acqua and Ethan Mollick ran a large field experiment and named something many of us had felt: AI capability has a <em>jagged frontier</em>. It isn&rsquo;t uniformly strong or weak. Some tasks that look hard sit easily inside it; some that look trivial fall outside; and the boundary is invisible from where you stand. Two tasks of identical apparent difficulty can land on opposite sides, and you can&rsquo;t tell which is which until you&rsquo;re across the line.</p>
+
+    <p>Put the frontier together with the two kinds of work and the engine turns over. Implementation &mdash; predictable, well-trodden &mdash; sits comfortably inside the frontier, and agents compress it hard: ten times, fifty, sometimes a hundred. Exploration straddles the frontier or sits outside it, where the model is least reliable precisely because the work is least precedented. The places with the most unknowns are the places the model knows least about; there the compression is small, two times, maybe five.</p>
+
+    <p>Call this the <strong>jagged dividend</strong>: the payoff from agents is enormous, but it lands almost entirely on the predictable half of the work and barely touches the unpredictable half. AI made the keystrokes free. It did not make the surprises free.</p>
+
+    <h2>A simplification I&rsquo;ve been making</h2>
+
+    <p>I&rsquo;ve been telling a small lie to keep that clean, and the correction is where the useful part lives.</p>
+
+    <p>The lie is that <em>predictable</em> and <em>compressible</em> are the same thing. They&rsquo;re not &mdash; they&rsquo;re two different axes, and a lot of real work lives in the corners where they come apart. Take the most ordinary example: waiting for a release to be approved. Or a security sign-off, the soak time on an A/B test, another team shipping the dependency you need. That work is perfectly predictable &mdash; you can put a date on it, it almost never surprises you &mdash; and an agent does nothing for it at all. It&rsquo;s gated by people, process, and physics, not by anyone&rsquo;s ability to write code faster. No model release touches it.</p>
+
+    <p>So plot software work on both axes, and it falls into four corners, not two:</p>
+
+    <figure class="fig" id="fig-map">
+      <p class="fig-eyebrow">Figure 1 &middot; A map of software work</p>
+      <h3 class="fig-title">What agents actually compress</h3>
+      <p class="fig-dek">Every task sits on two axes: how predictable its outcome is, and how much an agent compresses the time it takes. Those aren&rsquo;t the same thing. Drag capability up and watch which work slides right &mdash; and which refuses to.</p>
+
+      <div class="plot-area">
+        <div class="yaxis"><span>&uarr; Predictability of outcome</span></div>
+        <div class="plot-col">
+          <div class="plot" id="m-plot">
+            <div class="czone"></div>
+            <div class="midline h"></div>
+            <div class="midline v"></div>
+            <div class="threshold"><b>highly compressible &rarr;</b></div>
+            <div class="qlabel q-tl"><b>The waits</b>predictable &mdash; agents can&rsquo;t touch them</div>
+            <div class="qlabel q-tr"><b>The dividend zone</b>predictable &amp; crushed</div>
+            <div class="qlabel q-bl"><b>The irreducible core</b>decisions &mdash; neither predictable nor compressible</div>
+            <div class="qlabel q-br"><b>Resolvable surprises</b>discovery &mdash; agents speed the finding</div>
+          </div>
+          <div class="xaxis">Compressibility &mdash; how much an agent collapses the cost &rarr;</div>
+        </div>
+      </div>
+
+      <div class="ctl">
+        <div class="ctl-top"><span class="name">Model capability</span><span class="val" id="m-capval"></span></div>
+        <input type="range" id="m-cap" min="0" max="100" value="50" step="1" aria-label="Model capability">
+        <div class="ends"><span>weaker</span><span>&asymp; today</span><span>frontier</span></div>
+      </div>
+
+      <div class="legend">
+        <div><i class="sw-cog"></i><span><b>Cognitive work</b> &mdash; moves right as models improve</span></div>
+        <div><i class="sw-wait"></i><span><b>Waits</b> &mdash; gated by people, process, physics</span></div>
+        <div><i class="sw-judg"></i><span><b>Judgment</b> &mdash; gated by taste and intent</span></div>
+      </div>
+
+      <p class="readout" id="m-readout"></p>
+      <figcaption class="fig-cap">Implementation sits top-right, predictable and crushed; the waits sit top-left, predictable but immovable; exploration splits across the bottom. Raise capability and cognitive work slides right while the waits and the judgment core stay put.</figcaption>
+    </figure>
+
+    <p>Implementation lives in the top-right: predictable and crushed. The waits live in the top-left: predictable but immovable. And exploration splits across the whole bottom row &mdash; which is the part worth slowing down for.</p>
+
+    <p>Because the bottom row hides the real question: why do agents compress some surprises and not others? The honest answer is that &ldquo;exploration&rdquo; was always two different kinds of unknown. Sometimes the answer already exists and you just haven&rsquo;t found it yet &mdash; the bug is in there somewhere, the API behaves some definite way, the legacy code does what it does. That&rsquo;s <em>discovery</em>, and it&rsquo;s a search problem, exactly what an agent is built for: it can read more, try more, and bisect faster than you, so it compresses discovery a lot. Raise capability on the figure above and you can watch debugging and code-spelunking slide rightward across the frontier.</p>
+
+    <p>The other kind has no answer to find, because the answer doesn&rsquo;t exist until someone decides it. What should the product do here? Which of three reasonable tradeoffs do we want? Is this abstraction worth the coupling? That&rsquo;s <em>decision</em>, and it&rsquo;s invention, not search. There&rsquo;s nothing to retrieve, so an agent can draft options but can&rsquo;t resolve them &mdash; the resolution is an act of commitment, and the commitment is yours. Decision-work barely compresses however capable the model gets, which is why the bottom-left corner stays stuck while everything around it slides right.</p>
+
+    <h2>The inversion</h2>
+
+    <p>Now run the dividend through a project. Picture an old one that took 100 units of effort: 70 of implementation, 30 of exploration. Compress the implementation twenty times and the exploration three, and you get roughly 3.5 and 10 &mdash; about 13.5 units, a sevenfold speedup.<sup class="fnref" id="fnref-2"><a href="#fn-2">2</a></sup> The project really is much faster. But the mix inverts: implementation falls from 70% of the work to a quarter, and exploration climbs from 30% to nearly three-quarters. The bottleneck didn&rsquo;t disappear. It moved onto the work you were never able to estimate.</p>
+
+    <figure class="fig" id="fig-inv">
+      <p class="fig-eyebrow">Figure 2 &middot; The inversion</p>
+      <h3 class="fig-title">What compression does to the mix</h3>
+      <p class="fig-dek">Compress the predictable work hard and the unpredictable work barely, and a much faster project ends up made almost entirely of the part you can&rsquo;t estimate. The project is fixed at 100 units of effort.</p>
+
+      <div class="iv-controls">
+        <div class="iv-ctl">
+          <div class="iv-ctl-top"><span>Starting mix &middot; implementation</span><span class="iv-val" id="iv-shareOut"></span></div>
+          <input type="range" id="iv-share" min="50" max="90" value="70" step="5" aria-label="Starting implementation share">
+        </div>
+        <div class="iv-ctl">
+          <div class="iv-ctl-top"><span>Implementation compression</span><span class="iv-val" id="iv-implOut"></span></div>
+          <input type="range" id="iv-impl" min="1" max="50" value="20" step="1" aria-label="Implementation compression factor">
+        </div>
+        <div class="iv-ctl">
+          <div class="iv-ctl-top"><span>Exploration compression</span><span class="iv-val" id="iv-explOut"></span></div>
+          <input type="range" id="iv-expl" min="1" max="8" value="3" step="0.5" aria-label="Exploration compression factor">
+        </div>
+      </div>
+
+      <p class="iv-cap"><span>The mix &mdash; share of the project</span></p>
+      <div class="iv-mixrow"><span class="iv-rowlab">before</span>
+        <div class="iv-bar"><div class="iv-seg iv-impl" id="iv-b-impl"></div><div class="iv-seg iv-expl" id="iv-b-expl"></div></div>
+      </div>
+      <div class="iv-mixrow"><span class="iv-rowlab">after</span>
+        <div class="iv-bar"><div class="iv-seg iv-impl" id="iv-a-impl"></div><div class="iv-seg iv-expl" id="iv-a-expl"></div></div>
+      </div>
+
+      <p class="iv-cap" style="margin-top:20px"><span>Total effort &mdash; same scale</span><span class="iv-speed" id="iv-speed"></span></p>
+      <div class="iv-scalewrap">
+        <div class="iv-scalerow"><span class="iv-rowlab">before</span>
+          <div class="iv-track"><div class="s iv-impl" id="iv-tb-impl"></div><div class="s iv-expl" id="iv-tb-expl"></div></div>
+          <span class="iv-tnum" id="iv-n-before"></span>
+        </div>
+        <div class="iv-scalerow"><span class="iv-rowlab">after</span>
+          <div class="iv-track"><div class="s iv-impl" id="iv-ta-impl"></div><div class="s iv-expl" id="iv-ta-expl"></div></div>
+          <span class="iv-tnum" id="iv-n-after"></span>
+        </div>
+      </div>
+
+      <div class="iv-stats">
+        <div class="iv-stat"><span class="iv-stat-lab">Implementation share</span><span class="iv-stat-val" id="iv-s-impl"></span></div>
+        <div class="iv-stat"><span class="iv-stat-lab">Exploration share</span><span class="iv-stat-val" id="iv-s-expl"></span></div>
+        <div class="iv-stat"><span class="iv-stat-lab">Relative uncertainty</span><span class="iv-stat-val" id="iv-s-ru"></span></div>
+      </div>
+      <p class="iv-foot">Spreads held fixed at &plusmn;10% for implementation and &plusmn;100% for exploration; relative uncertainty is the combined spread over the mean. The project gets shorter and less trustworthy at once.</p>
+      <figcaption class="fig-cap">A fixed 100-unit project under compression. The total shrinks, but the makeup flips &mdash; the predictable work that dominated the average nearly vanishes, leaving a faster project made mostly of the unpredictable kind.</figcaption>
+    </figure>
+
+    <p>That&rsquo;s what those idle gaps were. When implementation was most of the job, the human was rarely the thing everyone waited on. Now that implementation collapses to almost nothing, the project spends most of its time waiting on the one input that didn&rsquo;t speed up &mdash; me, working out what to do next. Speed up one part of a system enough and whatever you didn&rsquo;t speed up becomes the whole story.</p>
+
+    <p>People assume faster work is more predictable work: if a project goes seven times faster, surely the schedule gets seven times easier to trust. The opposite holds, and it&rsquo;s worth being exact about why.</p>
+
+    <p>Estimation was never really about the average duration of work. It was about the variance. Implementation was always low-variance &mdash; you&rsquo;d done it before, so a piece you guessed at four days came in at three or five, not thirty. Exploration was always high-variance: a single unknown might cost an hour or a fortnight, and you couldn&rsquo;t tell which up front. In the old world the low-variance work was most of the total, so a single date felt solid; the wild part was small enough to bury in a buffer and call a risk.</p>
+
+    <p>The dividend strips out the low-variance work and leaves a project made almost entirely of the high-variance kind. So the estimate gets shorter and less trustworthy at once. Implementation was ballast &mdash; a heavy, stable mass low in the boat, dominating the average and keeping everything steady even though the exploration variance was down there the whole time. Take the ballast out and the boat is lighter and far faster, and it rocks with every wave. Faster and less predictable aren&rsquo;t in tension; they&rsquo;re the same event.</p>
+
+    <p>Not all of the remainder is unpredictable, though, and this is where the four corners pay off. The waits are still in there, and they&rsquo;re still predictable &mdash; you <em>can</em> put dates on them. So what&rsquo;s left is really two different piles: plannable time you can schedule around, and genuinely unknowable time you can only price as a range. The honest schedule keeps them apart instead of drowning both in one buffer.</p>
+
+    <h2>The dividend is personal</h2>
+
+    <p>There&rsquo;s one more place the average lies, and it&rsquo;s about people, not tasks.</p>
+
+    <p>The dividend isn&rsquo;t a fixed multiplier the tools hand out. What you actually get depends on who&rsquo;s holding the agent. Reading the jagged frontier &mdash; sensing which task will sail and which will quietly go off a cliff, noticing when confident-looking output is wrong &mdash; is itself a skill, and a fairly senior one. A strong engineer routes around the jagged edges they can see coming; someone newer walks straight into them and burns a day discovering the agent was lying. Same tool, very different dividend.</p>
+
+    <p>I can watch this in my own short history. Two years in, the things I now do without thinking are exactly the things I once lost whole days to, and the gap between what an agent does for me now and what it did a year ago is mostly me, not the model. The multiplier compounds with judgment.</p>
+
+    <p>In a perfect world for whoever builds the schedule, you&rsquo;d know every team member&rsquo;s personal dividend factor and estimate accordingly &mdash; Ana ships this flavor of work at 8&times;, Sam at 2&times;, plan around it. I mostly say that as a joke: the moment you write that number down it becomes a target, someone games it, and you&rsquo;ve built a tiny dystopia where people are ranked by their AI multiplier. But the serious version survives the joke. If the dividend is uneven and it tracks judgment, then the highest-leverage thing a manager can do is invest, relentlessly and in everyone, in the thing that raises it &mdash; the taste to know what to ask for, and the experience to tell when the answer is wrong. That used to accumulate on its own, as a byproduct of doing the predictable work by hand. It&rsquo;s exactly the byproduct the dividend just removed, so now you have to fund it on purpose.</p>
+
+    <h2>What to do about it</h2>
+
+    <p>So what do you actually do, once the number you have to produce is mostly made of the part you can&rsquo;t predict?</p>
+
+    <p>Not estimate more cleverly. The deeper problem is that a single date was always doing three jobs at once, and we only noticed when one of them broke. A date is a <em>forecast</em> &mdash; how long will this take? It&rsquo;s also a <em>commitment</em> &mdash; what are we promising the business? And it&rsquo;s a <em>coordination signal</em> &mdash; what should everyone else plan around? For years one number carried all three, because the work was predictable enough that the forecast was solid and the other two could lean on it. The dividend broke only the first leg, the forecast, but we still ask one number to do all three, so the whole thing feels broken.</p>
+
+    <p>The fields that have always lived on unpredictable work &mdash; research labs, drug pipelines, venture investing &mdash; sorted this out long ago, and their move is the same every time: stop loading one number with three jobs, and use a different instrument for each.</p>
+
+    <p>For the forecast, estimate the rate, not the instance. You can&rsquo;t predict a single surprise, but the frequency of surprises across a body of similar work is remarkably stable, so stop estimating this task bottom-up and ask how long work like it actually took. Pharma can&rsquo;t tell you which molecule fails, only that nine in ten will; you can&rsquo;t tell which feature blows up, only that your &ldquo;two-day&rdquo; tasks have a long tail. The unit of forecasting moves up from the task to the reference class, where the variance becomes legible again.</p>
+
+    <p>For the commitment, gate it. Don&rsquo;t promise the finish; promise how much you&rsquo;ll spend before the next decision point, and pre-commit to what would make you stop. Every exploration-heavy field tranches its money this way, and the cultural piece software is worst at is the one that matters most: a fast kill has to count as a win, not a failure, or sunk cost wins and the surprise metastasizes.</p>
+
+    <p>For the investment &mdash; the learning, the dividend-raising from the last section &mdash; give it its own line. Anything funded silently inside a delivery estimate gets cut under pressure, because it&rsquo;s the least legible thing in the buffer. Research orgs don&rsquo;t pay for basic research out of the product budget for exactly this reason. Name it, protect it, and accept that some fraction of effort is supposed to produce nothing shippable &mdash; that fraction is what buys next year&rsquo;s ability to do the exploration that never compresses.</p>
+
+    <p>And there&rsquo;s a fourth instrument the dividend hands you for free. You don&rsquo;t only suffer variance; you can shape it, by choosing the order you confront the unknowns. Front-load the worst one and it resolves while the project is still cheap to redirect; bury it and it detonates after you&rsquo;ve built everything around it. This is the one place the dividend works directly for the estimator: implementation is cheap enough now that you can build a throwaway prototype purely to kill a risk early, converting your new free capacity straight into bought-down uncertainty. The variance in your schedule is partly a function of your schedule. Spend the dividend collapsing it.</p>
+
+    <div class="dinkus">&middot; &middot; &middot;</div>
+
+    <p>I&rsquo;ve been writing as if it&rsquo;s just me and an agent, because on a weekend it is. On a team it gets stranger. If implementation is nearly free and the binding constraint is human understanding, then the real bottleneck isn&rsquo;t any one person&rsquo;s thinking &mdash; it&rsquo;s how fast understanding moves <em>between</em> people. The scarce resource becomes the shared mental model: who knows why the thing is shaped the way it is, and how quickly that spreads. That quietly turns the org chart into an estimation problem, and it&rsquo;s big enough that I&rsquo;ll leave it for its own piece.</p>
+
+    <p>For now, the smaller honest conclusion. The reflex is to read an idle agent as the last inefficiency, the thing still waiting to be optimized away. It&rsquo;s backwards. The waiting is the work now. The estimate was never measuring the typing; we just couldn&rsquo;t see that while the typing was most of the job. So when a number you write down feels more like a guess than it used to, you haven&rsquo;t gotten worse at this. The part you could count got automated, and what&rsquo;s left underneath was always the part nobody could name: how long it takes to understand what you don&rsquo;t yet understand. That was never a date. The honest move is to stop writing it down as one.</p>
+
+  </div>
+
+  <section class="notes">
+    <h2>Notes</h2>
+    <ol>
+      <li id="fn-1">I&rsquo;m sorting work by whether its outcome is knowable in advance, which makes &ldquo;exploration is unpredictable&rdquo; sound circular. But the load-bearing claims aren&rsquo;t the definition. They&rsquo;re that predictable work used to be most of a project, and that agents compress the two kinds at very different rates. Both are empirical, and everything else follows. <a class="fnback" href="#fnref-1">&#8617;</a></li>
+      <li id="fn-2">The ratios are invented to show direction, not measured; pick your own, and as long as implementation compresses harder than exploration, the mix still inverts. The figure below lets you do exactly that. <a class="fnback" href="#fnref-2">&#8617;</a></li>
+    </ol>
+  </section>
+
+</article>
+
+<script>
+(function(){
+  var TASKS=[
+    {n:"Boilerplate / CRUD",pred:.90,c0:.45,r:.50,cat:"cog"},
+    {n:"Glue code from a spec",pred:.79,c0:.40,r:.50,cat:"cog"},
+    {n:"Standard refactor",pred:.85,c0:.35,r:.55,cat:"cog"},
+    {n:"Test scaffolding",pred:.73,c0:.33,r:.55,cat:"cog"},
+    {n:"Debugging a known system",pred:.36,c0:.25,r:.55,cat:"cog"},
+    {n:"Learning an unfamiliar API",pred:.45,c0:.28,r:.50,cat:"cog"},
+    {n:"Spelunking legacy code",pred:.29,c0:.22,r:.55,cat:"cog"},
+    {n:"Throwaway prototype",pred:.22,c0:.35,r:.50,cat:"cog"},
+    {n:"Novel architecture",pred:.15,c0:.12,r:.55,cat:"cog"},
+    {n:"Release / freeze approval",pred:.92,c0:.06,r:.00,cat:"wait"},
+    {n:"Compliance / security review",pred:.66,c0:.08,r:.04,cat:"wait"},
+    {n:"Human code review",pred:.58,c0:.14,r:.10,cat:"wait"},
+    {n:"A/B soak time",pred:.80,c0:.05,r:.00,cat:"wait"},
+    {n:"Vendor / dependency lead time",pred:.50,c0:.05,r:.00,cat:"wait"},
+    {n:"CI / build / test runtime",pred:.86,c0:.18,r:.08,cat:"wait"},
+    {n:"What should the product be",pred:.10,c0:.08,r:.05,cat:"judg"},
+    {n:"Taste / UX judgment",pred:.27,c0:.12,r:.05,cat:"judg"},
+    {n:"Stakeholder changes mind",pred:.05,c0:.06,r:.00,cat:"judg"},
+    {n:"Competing-goals negotiation",pred:.40,c0:.12,r:.05,cat:"judg"}
+  ];
+  var TH=0.60;
+  var plot=document.getElementById('m-plot');
+  var cap=document.getElementById('m-cap');
+  var capval=document.getElementById('m-capval');
+  var readout=document.getElementById('m-readout');
+  function clamp(v){return Math.max(0,Math.min(1,v));}
+  function compAt(t,c){return clamp(t.c0+t.r*c);}
+  TASKS.forEach(function(t){
+    var y=(1-t.pred)*100;
+    if(t.cat==="cog"){
+      var trail=document.createElement('div');trail.className='trail';trail.style.top=y+'%';
+      var org=document.createElement('div');org.className='origin';org.style.top=y+'%';org.style.left=(t.c0*100)+'%';
+      plot.appendChild(trail);plot.appendChild(org);t._trail=trail;
+    }
+    var node=document.createElement('div');node.className='node cat-'+t.cat;node.tabIndex=0;
+    node.style.top=y+'%';node.setAttribute('aria-label',t.n);
+    var dot=document.createElement('div');dot.className='dot';
+    var lbl=document.createElement('div');lbl.className='lbl';lbl.textContent=t.n;
+    node.appendChild(dot);node.appendChild(lbl);plot.appendChild(node);
+    t._node=node;t._lbl=lbl;
+  });
+  function render(){
+    var c=(+cap.value)/100,compressed=0,cogResist=0;
+    TASKS.forEach(function(t){
+      var x=compAt(t,c),xp=x*100;
+      t._node.style.left=xp+'%';
+      t._lbl.className='lbl '+(xp>62?'left':'right');
+      if(t._trail){var o=t.c0*100;t._trail.style.left=Math.min(o,xp)+'%';t._trail.style.width=Math.abs(xp-o)+'%';}
+      if(x>=TH)compressed++;else if(t.cat==='cog')cogResist++;
+    });
+    capval.textContent=Math.round(c*100)+' / 100';
+    var tail;
+    if(cogResist>=4)tail="Most cognitive work is still on the left, not yet inside the frontier. Push capability higher.";
+    else if(cogResist>=1)tail="The cognitive work is nearly all across the line now. What&rsquo;s left resisting is mostly the waits and the judgment core.";
+    else tail="<b style='color:var(--ink)'>Everything still resisting agents is gated by people, process, or judgment &mdash; not model skill.</b> That left-edge column is the permanent bottleneck, and no release moves it.";
+    readout.innerHTML='At this capability, <span class="n">'+compressed+' of '+TASKS.length+'</span> task types are highly compressible. '+tail;
+  }
+  cap.addEventListener('input',render);render();
+})();
+
+(function(){
+  var TOTAL=100,IS=0.10,ES=1.00;
+  var $=function(id){return document.getElementById(id);};
+  var share=$('iv-share'),impl=$('iv-impl'),expl=$('iv-expl');
+  function seg(el,w,label){el.style.width=w+'%';el.textContent=(w>=15?label:'');}
+  function render(){
+    var sh=+share.value/100,ic=+impl.value,ec=+expl.value;
+    var i0=TOTAL*sh,e0=TOTAL*(1-sh),i1=i0/ic,e1=e0/ec;
+    var t0=i0+e0,t1=i1+e1,speed=t0/t1;
+    var iSh0=i0/t0*100,eSh0=e0/t0*100,iSh1=i1/t1*100,eSh1=e1/t1*100;
+    var sp0=Math.sqrt(Math.pow(IS*i0,2)+Math.pow(ES*e0,2));
+    var sp1=Math.sqrt(Math.pow(IS*i1,2)+Math.pow(ES*e1,2));
+    var ru0=sp0/t0*100,ru1=sp1/t1*100;
+
+    $('iv-shareOut').textContent=Math.round(sh*100)+'%';
+    $('iv-implOut').textContent=ic+'\u00D7';
+    $('iv-explOut').textContent=ec+'\u00D7';
+
+    seg($('iv-b-impl'),iSh0,'implementation '+Math.round(iSh0)+'%');
+    seg($('iv-b-expl'),eSh0,'exploration '+Math.round(eSh0)+'%');
+    seg($('iv-a-impl'),iSh1,'impl '+Math.round(iSh1)+'%');
+    seg($('iv-a-expl'),eSh1,'exploration '+Math.round(eSh1)+'%');
+
+    $('iv-tb-impl').style.width=i0+'%';$('iv-tb-expl').style.width=e0+'%';
+    $('iv-ta-impl').style.width=i1+'%';$('iv-ta-expl').style.width=e1+'%';
+    $('iv-n-before').textContent=Math.round(t0)+' units';
+    $('iv-n-after').textContent=(t1<10?t1.toFixed(1):Math.round(t1))+' units';
+    $('iv-speed').textContent=speed.toFixed(1)+'\u00D7 faster';
+
+    $('iv-s-impl').innerHTML=Math.round(iSh0)+'%<span class="ar">&rarr;</span>'+Math.round(iSh1)+'%';
+    $('iv-s-expl').innerHTML=Math.round(eSh0)+'%<span class="ar">&rarr;</span>'+Math.round(eSh1)+'%';
+    $('iv-s-ru').innerHTML=Math.round(ru0)+'%<span class="ar">&rarr;</span>'+Math.round(ru1)+'%';
+  }
+  share.addEventListener('input',render);
+  impl.addEventListener('input',render);
+  expl.addEventListener('input',render);
+  render();
+})();
+</script>
+</body>
+</html>
