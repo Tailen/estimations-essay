@@ -227,10 +227,28 @@
     #fig-map .node,#fig-map .trail,#fig-inv .iv-seg,#fig-inv .iv-track .s{transition:none!important}
   }
   #fig-map .node,#fig-map .trail{transition:left .55s cubic-bezier(.4,0,.2,1),width .55s cubic-bezier(.4,0,.2,1)}
+
+  .langtoggle{display:flex;justify-content:flex-end;gap:0;margin-bottom:18px}
+  .langtoggle button{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:5px 13px;
+    border:1px solid var(--rule);background:#fff;color:var(--ink-2);cursor:pointer;line-height:1}
+  .langtoggle button:first-child{border-radius:6px 0 0 6px}
+  .langtoggle button:last-child{border-radius:0 6px 6px 0;border-left:none}
+  .langtoggle button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .langtoggle button:focus-visible{outline:2px solid var(--blue);outline-offset:2px;position:relative;z-index:1}
+  body.zh{font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC",var(--sans)}
+  body.zh h1,body.zh .prose h2,body.zh .fig-title,body.zh .dek{font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC",var(--sans)}
+  body.zh .prose p{line-height:1.85}
+  body.zh .dek{font-style:normal}
+  body.zh .lead::first-letter{float:none;font-size:inherit;padding:0;line-height:inherit;font-family:inherit}
 </style>
 </head>
 <body>
 <article class="wrap">
+
+  <div class="langtoggle" role="group" aria-label="Language / 语言">
+    <button id="lang-en" class="active" type="button" aria-pressed="true">EN</button>
+    <button id="lang-zh" type="button" aria-pressed="false">中文</button>
+  </div>
 
   <header class="masthead">
     <p class="kicker">Estimation</p>
@@ -485,11 +503,19 @@
       if(x>=TH)compressed++;else if(t.cat==='cog')cogResist++;
     });
     capval.textContent=Math.round(c*100)+' / 100';
+    var zh=document.body.classList.contains('zh');
     var tail;
-    if(cogResist>=4)tail="Most cognitive work is still on the left, not yet inside the frontier. Push capability higher.";
-    else if(cogResist>=1)tail="The cognitive work is nearly all across the line now. What&rsquo;s left resisting is mostly the waits and the judgment core.";
-    else tail="<b style='color:var(--ink)'>Everything still resisting agents is gated by people, process, or judgment, not model skill.</b> That left-edge column is the permanent bottleneck, and no release moves it.";
-    readout.innerHTML='At this capability, <span class="n">'+compressed+' of '+TASKS.length+'</span> task types are highly compressible. '+tail;
+    if(zh){
+      if(cogResist>=4)tail="大部分认知工作还在左边，尚未进入前沿。把能力再调高些。";
+      else if(cogResist>=1)tail="认知工作现在几乎都越过了那条线。还在抵抗的，大多是等待和判断内核。";
+      else tail="<b style=\"color:var(--ink)\">仍在抵抗智能体的一切，都由人、流程或判断卡住，而不是模型能力。</b>左缘那一列是永久的瓶颈，没有哪次发布能挪动它。";
+      readout.innerHTML='在当前能力下，<span class="n">'+TASKS.length+' 类里有 '+compressed+' 类</span>是高度可压缩的。'+tail;
+    }else{
+      if(cogResist>=4)tail="Most cognitive work is still on the left, not yet inside the frontier. Push capability higher.";
+      else if(cogResist>=1)tail="The cognitive work is nearly all across the line now. What&rsquo;s left resisting is mostly the waits and the judgment core.";
+      else tail="<b style=\"color:var(--ink)\">Everything still resisting agents is gated by people, process, or judgment, not model skill.</b> That left-edge column is the permanent bottleneck, and no release moves it.";
+      readout.innerHTML='At this capability, <span class="n">'+compressed+' of '+TASKS.length+'</span> task types are highly compressible. '+tail;
+    }
   }
   cap.addEventListener('input',render);render();
 })();
@@ -512,16 +538,18 @@
     $('iv-implOut').textContent=ic+'\u00D7';
     $('iv-explOut').textContent=ec+'\u00D7';
 
-    seg($('iv-b-impl'),iSh0,'implementation '+Math.round(iSh0)+'%');
-    seg($('iv-b-expl'),eSh0,'exploration '+Math.round(eSh0)+'%');
-    seg($('iv-a-impl'),iSh1,'impl '+Math.round(iSh1)+'%');
-    seg($('iv-a-expl'),eSh1,'exploration '+Math.round(eSh1)+'%');
+    var zh=document.body.classList.contains('zh');
+    var L=zh?{impl:'实现',expl:'探索',implShort:'实现',units:' 单位',faster:'\u00D7 更快'}:{impl:'implementation',expl:'exploration',implShort:'impl',units:' units',faster:'\u00D7 faster'};
+    seg($('iv-b-impl'),iSh0,L.impl+' '+Math.round(iSh0)+'%');
+    seg($('iv-b-expl'),eSh0,L.expl+' '+Math.round(eSh0)+'%');
+    seg($('iv-a-impl'),iSh1,L.implShort+' '+Math.round(iSh1)+'%');
+    seg($('iv-a-expl'),eSh1,L.expl+' '+Math.round(eSh1)+'%');
 
     $('iv-tb-impl').style.width=i0+'%';$('iv-tb-expl').style.width=e0+'%';
     $('iv-ta-impl').style.width=i1+'%';$('iv-ta-expl').style.width=e1+'%';
-    $('iv-n-before').textContent=Math.round(t0)+' units';
-    $('iv-n-after').textContent=(t1<10?t1.toFixed(1):Math.round(t1))+' units';
-    $('iv-speed').textContent=speed.toFixed(1)+'\u00D7 faster';
+    $('iv-n-before').textContent=Math.round(t0)+L.units;
+    $('iv-n-after').textContent=(t1<10?t1.toFixed(1):Math.round(t1))+L.units;
+    $('iv-speed').textContent=speed.toFixed(1)+L.faster;
 
     $('iv-s-impl').innerHTML=Math.round(iSh0)+'%<span class="ar">&rarr;</span>'+Math.round(iSh1)+'%';
     $('iv-s-expl').innerHTML=Math.round(eSh0)+'%<span class="ar">&rarr;</span>'+Math.round(eSh1)+'%';
@@ -531,6 +559,37 @@
   impl.addEventListener('input',render);
   expl.addEventListener('input',render);
   render();
+})();
+</script>
+<script>
+(function(){
+  var PROSE_ZH=["上个月，我跟同事说一个小功能两天就能做完。代码只花了一个下午。大部分是智能体写的，我在旁边审；我给估时时脑子里设想的那部分，基本上午就做完了。然后我在一件完全没料到的事情上花了三天：一个我以为自己很了解的系统里，藏着一个想当然的假设。我估的是我能看见的那部分工作，而时间全花在了我看不见的那部分上。", "这道缝隙，就是我为什么忽然能做多得多、却预测得少得多的全部原因。", "我是技术负责人，所以估时是我工作的一部分：日期由我给出，之后也由我来负责。我做这行还没几十年，但给过的预测、为这些预测背过的锅，已经足够让我感觉到地基在移动。自从我开始依赖 Codex 这类编码工具，它移动得尤其明显。产出上去了，估时却在同一瞬间崩掉，而我有好一阵子说不清为什么。", "我现在的结论是这样。编码智能体让估时变难，不是因为它增加了不确定性，而是因为它把工作中可预测的那部分压缩到几乎为零，却没碰不可预测的那部分。剩在时间表上的，大多是你一开始就根本估不了的东西。", "解释这件事需要三个概念：两个旧的，一个新的。", "两种工作", "1986 年，Fred Brooks 在软件中划下了一条至今仍然有用的界线。他说，一部分困难是偶然的，是表达你已经理解的东西时产生的摩擦：样板代码、管道粘合、语法。其余的是本质的：弄清楚这东西应该是什么、各部分如何拼合，这种困难无法削减。工具可以永远地削减偶然的部分，却永远碰不到本质的部分。四十年的语言与框架证明了他是对的：每一代都让表达更便宜，却让思考一如既往地难。", "今天我会把这条线画得略有不同，因为真正起作用的区分不是设计与打字，而是可预测与意外。把可预测的那部分叫做<em>实现</em>：任何一段你脑子里已经有清晰模型、只是把它变成代码的过程。你在敲之前就知道自己要敲什么。其余的一切都叫<em>探索</em>：澄清一个含糊的需求，把一个功能塞进一个并非为它而建的系统，以及最重要的，各种意外。文档从没提过的 API 返回值。悄悄让你的架构作废的变更需求。到第 200 行才发现是错的那个假设。偶尔，还有那个帮你省下半年的开源库新版本。", "探索不是一个阶段。它不会整整齐齐地待在项目开头的某一块里，而是细细地穿插在实现之中，一直细到单次敲键，而且你通常预先看不到它。它的单位不是小时或天，而是一次意外。<sup class=\"fnref\" id=\"fnref-1\"><a href=\"#fn-1\">1</a></sup>", "锯齿红利", "2023 年，由 Fabrizio Dell'Acqua 和 Ethan Mollick 带领的团队做了一个大型实地实验，给我们许多人早已感觉到的东西起了名字：AI 的能力有一条<em>锯齿状前沿</em>。它并非整体上强或弱。有些看着难的任务轻松落在前沿之内；有些看着不值一提的反而落在外面；而站在你的位置上，这条边界是看不见的。两个表面难度完全相同的任务，可能落在前沿的两侧，而你要等越过了那条线，才知道哪个是哪个。", "把这条前沿和两种工作放到一起，引擎就转起来了。实现可预测、路也走熟了，舒舒服服地落在前沿之内，智能体把它狠狠压缩：十倍、五十倍，有时一百倍。探索则横跨前沿、或干脆落在外面，而恰恰因为这类工作最没有先例，模型在那里最不可靠。未知最多的地方，正是模型了解最少的地方；在那里压缩很小，两倍，也许五倍。", "我把这叫做<strong>锯齿红利</strong>：智能体带来的回报极其巨大，但它几乎全部落在工作中可预测的那一半上，几乎不碰不可预测的那一半。AI 让敲键变得免费，却没有让意外变得免费。", "我一直在做的一个简化", "为了让那幅图保持干净，我一直在做简化。而我略去的那部分，正是有用之处所在。", "这个简化就是：把<em>可预测</em>和<em>可压缩</em>当成了同一件事。它们不是。它们是两条不同的轴，而大量真实的工作，恰恰落在这两者分开的角落里。举个最普通的例子：等一次发布获批。或者一次安全审核、一次 A/B 实验的观察期、另一个团队交付你需要的依赖。这类工作完全可预测。你能给它定个日期，它几乎从不让你意外。而智能体对它毫无帮助。卡住它的是人、流程和物理规律，不是谁能不能更快地写代码。任何模型的发布都动不了它。", "所以把软件工作放到这两条轴上，它落进的是四个角落，而不是两个：", "实现住在右上角：可预测，且被碾平。等待住在左上角：可预测，却纹丝不动。而探索铺满了整个下半行，这才是值得放慢脚步细看的部分。", "因为下半行藏着真正的问题：为什么智能体能压缩某些意外，却压缩不了另一些？老实的答案是，“探索”一直都是两种不同的未知。有时答案已经存在，只是你还没找到：bug 就在某处，API 有某种确定的行为，遗留代码就是那个样子。这是<em>发现</em>，是一个搜索问题，正是智能体的拿手好戏。它能比你读得更多、试得更多、二分得更快，所以它能大幅压缩发现。把上面图里的能力调高，你就能看到调试和啃旧代码一路向右滑过前沿。", "另一种未知则没有答案可找，因为在有人做出决定之前，答案根本不存在。产品在这里到底该怎么做？三个都合理的取舍里，我们要哪一个？这层抽象值不值它带来的耦合？这是<em>决策</em>，是发明，不是搜索。没有东西可供检索，所以智能体能起草选项，却没法替你定夺。定夺是一种承诺的行为，而承诺是你的。无论模型变得多强，决策类工作几乎都压缩不了，这正是为什么左下角原地不动，而它周围的一切都在向右滑。", "倒置", "现在把这份红利放进一个项目里走一遍。设想一个老项目，需要 100 个单位的投入：70 个是实现，30 个是探索。把实现压缩二十倍、探索压缩三倍，你得到大约 3.5 和 10，合计约 13.5 个单位，提速七倍。<sup class=\"fnref\" id=\"fnref-2\"><a href=\"#fn-2\">2</a></sup>项目确实快了很多。但构成倒置了：实现从占七成掉到约四分之一，探索从三成爬到接近四分之三。瓶颈没有消失，它挪到了你一直都估不了的那种工作上。", "我丢掉的那三天，去的就是这里。当实现还是工作的大头时，理解很少会卡住全局。如今实现塌缩到近乎于无，项目的大部分时间都在等那个唯一没有提速的输入：一个人在弄清楚到底发生了什么。把一个系统的某一部分提速到足够快，你没提速的那部分，就会变成故事的全部。", "人们想当然地以为，更快的工作就是更可预测的工作：一个项目快了七倍，时间表总该好信七倍吧。事实恰恰相反，而且值得把原因说精确。", "估时从来都不真正关乎工作的平均时长，而关乎方差。实现一向是低方差的：你以前做过，所以一件你估四天的活儿，落在三天或五天，而不是三十天。探索一向是高方差的：单个未知可能花一小时，也可能花两个星期，而你事先分不清是哪种。在旧世界里，低方差的工作占了总量的大头，所以一个单一的日期让人觉得靠谱；那点狂野的部分小到足以塞进缓冲、记作一项风险。", "红利把低方差的工作抽走，剩下的项目几乎全由高方差的那种构成。于是估时同时变得更短、也更不可信。实现曾是压舱物：沉沉地压在船的底部，主导着平均值，让一切保持平稳，尽管探索的方差一直就在底下。把压舱物拿走，船更轻、也快得多，却随每一道浪起伏。更快和更不可预测并不矛盾，它们就是同一件事。", "不过，剩下的并非全都不可预测，而这正是那四个角落派上用场的地方。等待还在里头，而且它们依然可预测：你<em>是能</em>给它们定日期的。所以真正剩下的其实是两堆不同的东西：可以排期绕开的可计划时间，和只能用区间来定价的真正不可知的时间。诚实的时间表会把它们分开，而不是把两者一起淹进同一个缓冲里。", "红利是因人而异的", "平均值还有一处在说谎，而这一处关乎人，不关乎任务。", "红利不是工具发给你的一个固定倍率。你实际拿到多少，取决于握着智能体的是谁。读懂这条锯齿状前沿本身就是一种技能，而且是相当资深的技能：感觉到哪个任务会一帆风顺、哪个会悄悄翻车，察觉到那些看起来信心十足的输出其实是错的。强的工程师会绕开自己能预见的锯齿；新手则直直撞上去，再花一天才发现智能体一直在骗他。同样的工具，红利天差地别。", "我能在自己短短的经历里看到这一点。入行两年，如今我不假思索就能做的事，恰恰是当年让我整天整天耗进去的那些；而智能体今天为我做到的、与一年前为我做到的之间的差距，大半来自我，而不是模型。这个倍率会随判断力而复利增长。", "在一个对掌管项目时间线的人来说堪称完美的世界里，你会知道每个成员各自的红利系数，并据此估时：Ana 做这类活儿是 8 倍，Sam 是 2 倍，照着排就行。我说这话多半是开玩笑。你一旦把那个数字写下来，它就变成了指标，就有人去钻它的空子，你也就造出了一个人人按 AI 倍率排座次的小型反乌托邦。但抛开玩笑，认真的那一面依然成立。如果红利分布不均、又与判断力挂钩，那么管理者能做的最高杠杆的事，就是不遗余力、对每一个人投资于那个能抬高它的东西：知道该提什么要求的品味，以及看得出答案何时出错的经验。这东西过去会自己积累，是亲手做那些可预测工作时的副产品。而它恰恰就是红利刚刚拿走的那个副产品，所以现在你得专门花成本去培养它。", "那该怎么办", "那么，当你必须给出的那个数字，大半由你预测不了的部分构成时，你究竟该怎么做？", "不是把时估得更聪明。更深的问题在于，一个单一的日期一直同时在干三件活儿，而我们只在其中一件坏掉时才注意到。一个日期是<em>预测</em>：这要花多久？它也是<em>承诺</em>：我们对业务方许下了什么？它还是<em>协调信号</em>：其他人该照着什么来安排？多年来一个数字能扛起这三件事，因为工作足够可预测，预测这一条腿很稳，另两条可以靠着它。红利只打断了第一条腿，也就是预测，可我们仍然要一个数字干完三件活儿，于是整件事都显得坏掉了。", "那些一直靠不可预测的工作过活的领域，比如研究实验室、新药管线、风险投资，老早就把这事想明白了。它们的做法每次都一样：别再让一个数字扛三件活儿，而是给每件活儿配一件不同的工具。", "对于预测，估的是频率，不是单个事件。你预测不了某一次意外，但在一大批相似工作上，意外出现的频率相当稳定，所以别再自下而上地估这个任务，而要问：像它这样的活儿，过去实际花了多久。药企没法告诉你哪个分子会失败，只知道十个里有九个会；你也没法说哪个功能会炸，只知道你那些“两天”的任务有一条长长的尾巴。预测的单位从单个任务上移到参照类，方差在那里重新变得清晰可读。", "对于承诺，给它设闸门。别承诺完工；要承诺的是在下一个决策点之前你会投入多少，并预先约定好什么情况下就停手。每一个探索密集的领域都这样把钱分批投放，而软件做得最差、却又最要紧的是那块文化：果断叫停必须算作一次胜利，而不是失败，否则沉没成本就会赢，意外则会扩散转移。", "对于投资，也就是上一节说的学习和抬高红利，给它单列一行。任何悄悄塞进交付估时里的东西，一遇到压力就会被砍掉，因为它是缓冲里最不显眼的那一项。研究机构不从产品预算里出基础研究的钱，正是这个道理。把它点名、给它保护，并接受这一点：总有一部分投入注定产不出任何可交付的东西。正是这部分，买下了明年你去做那种永不压缩的探索的能力。", "红利还白送给你第四件工具。你不只是被动地承受方差；你可以塑造它，办法是选择你面对未知的顺序。把最糟的那个未知提到前面，它会在项目还便宜、还容易掉头的时候就被解决；把它埋起来，它就会在你把一切都围着它搭好之后才引爆。这是红利直接为估时者出力的唯一地方：如今实现足够便宜，你可以纯粹为了尽早消掉一个风险而搭一个用完即弃的原型，把新得到的余力直接换成被买下来的确定性。你时间表里的方差，部分地是你时间表自身的函数。把红利花在压垮它上。", "我一直在像只有我和一个智能体那样写，因为周末确实就是这样。放到团队里，事情会更奇怪。如果实现近乎免费，而真正的约束是人的理解，那么真正的瓶颈就不在任何一个人的思考上，而在理解<em>在人与人之间</em>移动得有多快。稀缺资源变成了共享的心智模型：谁知道这东西为什么长成这个样子，以及这份知道能传播得多快。这悄悄地把组织架构变成了一道估时题，而它大到我得留给单独的一篇来写。", "眼下，先说那个更小、也更诚实的结论。我报的那两天，是对我能看见的那部分的一次真实估计。它没有失手，不是因为我手艺变差了，而是因为我能看见的那部分，不再是这份工作的本体。底下剩的那部分，一直都是没人能给出数字的东西：弄懂你尚未弄懂的东西，要花多久。那从来就不是一个日期。诚实的做法，是别再把它当成一个日期写下来。"];
+  var GROUPS=[{"sel": ".kicker", "zh": "估时"}, {"sel": "h1", "zh": "为什么如今的项目估时这么难"}, {"sel": ".dek", "zh": "编码智能体让我快了很多，也让我远没法说清任何事情何时能做完。结果发现，这两件事其实是同一件事。"}, {"sel": ".byline", "zh": "2026 年 6 月"}, {"sel": "#fig-map .fig-eyebrow", "zh": "图 1 · 软件工作地图"}, {"sel": "#fig-map .fig-title", "zh": "智能体究竟压缩了什么"}, {"sel": "#fig-map .fig-dek", "zh": "每一项工作都落在两条轴上：它的结果有多可预测，以及智能体能把它耗的时间压缩多少。这两件事并不相同。把能力往上拖，看哪些工作向右滑，哪些拒绝挪动。"}, {"sel": "#fig-map .yaxis span", "zh": "↑ 结果的可预测性"}, {"sel": "#fig-map .m-top .m-ql", "zh": ["<b>等待</b>可预测，智能体碰不了", "<b>红利区</b>可预测，被碾平"]}, {"sel": "#fig-map .threshold b", "zh": "高度可压缩 →"}, {"sel": "#fig-map .xaxis", "zh": "可压缩性：智能体能把成本压掉多少 →"}, {"sel": "#fig-map .m-bot .m-ql", "zh": ["<b>不可削减的内核</b>决策：既不可预测，也不可压缩", "<b>可解的意外</b>发现：智能体加速找到答案"]}, {"sel": "#fig-map .ctl .name", "zh": "模型能力"}, {"sel": "#fig-map .ends span", "zh": ["较弱", "≈ 当下", "前沿"]}, {"sel": "#fig-map .legend > div span", "zh": ["<b>认知工作</b>：随模型进步而右移", "<b>等待</b>：由人、流程、物理规律卡住", "<b>判断</b>：由品味与意图卡住"]}, {"sel": "#fig-map .fig-cap", "zh": "实现在右上，可预测且被碾平；等待在左上，可预测却挪不动；探索铺在下半。把能力调高，认知工作向右滑，而等待和判断内核留在原地。"}, {"sel": "#fig-inv .fig-eyebrow", "zh": "图 2 · 倒置"}, {"sel": "#fig-inv .fig-title", "zh": "压缩如何改变构成"}, {"sel": "#fig-inv .fig-dek", "zh": "把可预测的工作狠狠压缩、把不可预测的几乎不压，一个快得多的项目最终几乎全由你估不了的那部分构成。项目固定为 100 个单位的投入。"}, {"sel": "#fig-inv .iv-controls .iv-ctl .iv-ctl-top span:first-child", "zh": ["起始构成 · 实现", "实现的压缩倍数", "探索的压缩倍数"]}, {"sel": "#fig-inv .iv-cap span:first-child", "zh": ["构成：占项目的比例", "总投入：同一比例尺"]}, {"sel": "#fig-inv .iv-rowlab", "zh": ["之前", "之后", "之前", "之后"]}, {"sel": "#fig-inv .iv-stat-lab", "zh": ["实现占比", "探索占比", "相对不确定性"]}, {"sel": "#fig-inv .iv-foot", "zh": "实现的离散度固定为 ±10%，探索为 ±100%；相对不确定性是合成离散度除以均值。项目同时变得更短、也更不可信。"}, {"sel": "#fig-inv .fig-cap", "zh": "一个固定为 100 单位的项目在压缩之下。总量缩小，但构成翻转：曾主导均值的可预测工作几乎消失，留下一个更快、却主要由不可预测那种构成的项目。"}, {"sel": ".notes h2", "zh": "注释"}, {"sel": ".notes ol li", "zh": ["我是按结果能否预先知道来给工作分类的，这会让“探索是不可预测的”听起来像循环论证。但真正承重的论断并不是这个定义，而是：可预测的工作过去占了一个项目的大头，以及智能体对这两类工作的压缩速率差别极大。两者都是经验事实，其余的都由此推出。 <a class=\"fnback\" href=\"#fnref-1\">↩</a>", "这些比例是为了显示方向而虚构的，不是测出来的；换成你自己的也行，只要实现压缩得比探索更狠，构成就照样会倒置。下面的图正好让你试这件事。 <a class=\"fnback\" href=\"#fnref-2\">↩</a>"]}];
+  var prose=document.querySelectorAll('.prose > p, .prose > h2');
+  prose.forEach(function(el){el.setAttribute('data-en',el.innerHTML);});
+  GROUPS.forEach(function(g){
+    document.querySelectorAll(g.sel).forEach(function(el){ if(el.getAttribute('data-en')===null){el.setAttribute('data-en',el.innerHTML);} });
+  });
+  function setLang(lang){
+    var zh=lang==='zh';
+    document.documentElement.lang=zh?'zh-Hans':'en';
+    document.body.classList.toggle('zh',zh);
+    prose.forEach(function(el,i){ el.innerHTML = zh ? (PROSE_ZH[i]!=null?PROSE_ZH[i]:el.getAttribute('data-en')) : el.getAttribute('data-en'); });
+    GROUPS.forEach(function(g){
+      var els=document.querySelectorAll(g.sel);
+      for(var i=0;i<els.length;i++){
+        var z=Array.isArray(g.zh)?g.zh[i]:g.zh;
+        els[i].innerHTML = zh ? (z!=null?z:els[i].getAttribute('data-en')) : els[i].getAttribute('data-en');
+      }
+    });
+    var be=document.getElementById('lang-en'),bz=document.getElementById('lang-zh');
+    be.classList.toggle('active',!zh);bz.classList.toggle('active',zh);
+    be.setAttribute('aria-pressed',(!zh).toString());bz.setAttribute('aria-pressed',zh.toString());
+    var mc=document.getElementById('m-cap');if(mc){mc.dispatchEvent(new Event('input'));}
+    var is=document.getElementById('iv-share');if(is){is.dispatchEvent(new Event('input'));}
+  }
+  document.getElementById('lang-en').addEventListener('click',function(){setLang('en');});
+  document.getElementById('lang-zh').addEventListener('click',function(){setLang('zh');});
 })();
 </script>
 </body>
